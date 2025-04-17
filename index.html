@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="images/notebook.ico" type="image/x-icon">
+    <title>To-Do App</title>
+    <link rel="stylesheet" href="dist/build.css" />
+  </head>
+  <body class="bg-gray-400 h-screen flex items-center justify-center font-mono">
+    <main class="p-6 bg-gray-100 rounded-xl space-y-4">
+      <header class="text-center">
+        <h2 class="text-gray-700 text-2xl font-semibold">Task App</h2>
+        <p class="text-gray-500 text-sm italic">Organize your tasks here</p>
+      </header>
+      <form action="" class="flex text-sm">
+        <input
+          class="border border-r-0 border-gray-300 bg-gray-100 focus:outline-none px-3 py-2 rounded-l-xl"
+          type="text"
+          name="task-input"
+          id="task-input"
+          placeholder="Enter task"
+        />
+        <button
+          class="border border-l-0 px-2 py-2 rounded-r-xl border-gray-300 text-gray-900 bg-orange-400 cursor-pointer hover:bg-orange-500"
+          type="submit"
+          id="add-task"
+        >
+          Add
+        </button>
+      </form>
+      <section id="task-list" class="text-sm text-gray-700"></section>
+      <footer class="flex justify-between text-sm">
+        <span id="task-count" class="text-gray-500 hidden">0 Tasks</span>
+        <button
+          type="button"
+          id="clear-all"
+          class="text-red-400 cursor-pointer hidden"
+        >
+          Clear All
+        </button>
+      </footer>
+    </main>
+  </body>
+  <script>
+    const taskListSection = document.getElementById("task-list");
+    taskListSection.innerHTML = `<p id="no-tasks">No tasks. Add task above.</>`;
+
+    const taskInput = document.getElementById("task-input");
+    const addTaskBtn = document.getElementById("add-task");
+
+    const taskCount = document.getElementById("task-count");
+    const clearAllBtn = document.getElementById("clear-all");
+
+    const taskList = [];
+    let count = 15;
+
+    addTaskBtn.addEventListener("click", (e) => {
+      addTask(e);
+    });
+    function addTask(e) {
+      e.preventDefault();
+
+      const taskText = taskInput.value.trim();
+      if(!taskText){return}
+
+      const task = {
+        id: count++,
+        activity: taskText,
+      };
+
+      taskList.push(task);
+
+      appendTask(task);
+      displayTaskCount();
+
+      taskInput.value = "";
+    }
+
+    function appendTask(task) {
+      const checkbox = document.createElement("input");
+      checkbox.setAttribute("type", "checkbox");
+      checkbox.setAttribute("value", task.id);
+
+      checkbox.addEventListener("change", function () {
+        if (this.checked) {
+          label.classList.add("line-through", "text-gray-500");
+        } else {
+          label.classList.remove("line-through", "text-gray-500");
+        }
+      });
+
+      const label = document.createElement("label");
+      label.textContent = task.activity;
+
+      const taskContainer = document.createElement("div");
+      taskContainer.classList = "flex gap-3";
+
+      taskContainer.appendChild(checkbox);
+      taskContainer.appendChild(label);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.classList = "flex";
+      deleteBtn.setAttribute("type", "button");
+      deleteBtn.innerHTML = `<svg class="h-5 fill-gray-500" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>`;
+
+      const taskRowContainer = document.createElement("div");
+      taskRowContainer.classList = "flex justify-between space-y-2";
+      taskRowContainer.appendChild(taskContainer);
+      taskRowContainer.appendChild(deleteBtn);
+
+      if (taskList.length == 1) {
+        toggleListDisplay(true);
+        toggleFooter(false);
+      }
+      taskListSection.appendChild(taskRowContainer);
+
+      deleteBtn.addEventListener("click", function () {
+        for (let index = 0; index < taskList.length; index++) {
+          if (taskList[index].id == checkbox.value) {
+            taskList.splice(index, 1);
+
+            taskRowContainer.remove();
+            displayTaskCount();
+            if (taskList.length == 0) {
+              toggleFooter(true);
+              toggleListDisplay(false);
+            }
+            break;
+          }
+        }
+      });
+    }
+
+    function displayTaskCount() {
+      const totalTasks = taskList.length;
+      taskCount.textContent =
+        totalTasks == 1 ? `${totalTasks} Task` : `${totalTasks} Tasks`;
+    }
+
+    function toggleListDisplay(toggle) {
+      if (toggle) {
+        taskListSection.innerHTML = "";
+      } else {
+        taskListSection.innerHTML = "<p>No tasks. Add task above.</>";
+      }
+    }
+
+    function toggleFooter(toggle) {
+      if (toggle) {
+        taskCount.classList.add("hidden");
+        clearAllBtn.classList.add("hidden");
+      } else {
+        taskCount.classList.remove("hidden");
+        clearAllBtn.classList.remove("hidden");
+      }
+    }
+
+    clearAllBtn.addEventListener("click", resetTaskList);
+    function resetTaskList(){
+      taskList.length = 0;
+      toggleListDisplay(false);
+      toggleFooter(true);
+      displayTaskCount();
+    }
+  </script>
+</html>
